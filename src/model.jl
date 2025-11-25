@@ -286,6 +286,22 @@ function modelgrowth(;
     #     "B" => Dict(:init=>1.0, :lower=>0.0, :upper=>10.0), # assumes no negative growths
     #     "v" => Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0),
     # )
+    if !all(haskey(θ_search_space, param) for param in ["A", "K", "C", "Q", "B", "v"])
+        throw(
+            ArgumentError(
+                "θ_search_space must contain keys for all parameters: \"A\", \"K\", \"C\", \"Q\", \"B\", \"v\".",
+            ),
+        )
+    end
+    for (k, v) in θ_search_space
+        if !all(haskey(v, s) for s in [:init, :lower, :upper])
+            throw(
+                ArgumentError(
+                    "Each parameter in θ_search_space must have :init, :lower, and :upper keys.",
+                ),
+            )
+        end
+    end
     opt_fun(θ, t) = mean(
         (
             y - generalisedlogistic(

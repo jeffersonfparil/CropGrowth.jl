@@ -118,6 +118,7 @@ function fitgrowthmodels(
     verbose::Bool = false,
 )::DataFrame
     # df::DataFrame = simulate(); min_t::Int64=3; perc_of_final::Vector{Float64} = [0.5, 0.9]; fit_statistic::String = "R²"; maxiters::Int64 = 10_000; seed::Int64 = 42; show_plots::Bool=false; verbose::Bool=false
+    # A = Dict(:init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); K = Dict(:init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); C = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); Q = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0); v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0)
     if !all(x -> x ∈ names(df), REQUIRED_COLUMNS)
         throw(
             ArgumentError(
@@ -134,6 +135,15 @@ function fitgrowthmodels(
     end
     if ncol(df) > length(REQUIRED_COLUMNS) + 1
         @warn "DataFrame contains more than one trait column. Only the first trait column will be used, i.e. \"$(setdiff(names(df), REQUIRED_COLUMNS)[1])\"."
+    end
+    for p in [A, K, C, Q, B, v]
+        if !all(haskey(p, s) for s in [:init, :lower, :upper])
+            throw(
+                ArgumentError(
+                    "Parameter search space for $p must have :init, :lower, and :upper keys.",
+                ),
+            )
+        end
     end
     if fit_statistic ∉ ["R²", "RMSE", "MSE", "MAE", "ρ"]
         throw(

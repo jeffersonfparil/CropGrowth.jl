@@ -1,11 +1,19 @@
-using Documenter
 using CropGrowth
+using Documenter
 
-makedocs(sitename = "CropGrowth", format = Documenter.HTML(), modules = [CropGrowth])
+DocMeta.setdocmeta!(CropGrowth, :DocTestSetup, :(using CropGrowth); recursive = true)
 
-# Documenter can also automatically deploy documentation to gh-pages.
-# See "Hosting Documentation" and deploydocs() in the Documenter manual
-# for more information.
-#=deploydocs(
-    repo = "<repository url>"
-)=#
+makedocs(;
+    modules = [CropGrowth],
+    authors = "jeffersonparil@gmail.com",
+    sitename = "CropGrowth.jl",
+    format = Documenter.HTML(;
+        canonical = "https://jeffersonfparil.github.io/CropGrowth.jl",
+        edit_link = "main",
+        assets = String[],
+        size_threshold = 1000000,
+    ),
+    pages = ["Home" => "index.md"],
+)
+
+deploydocs(; repo = "github.com/jeffersonfparil/CropGrowth.jl", devbranch = "main")
