@@ -1,6 +1,6 @@
 name = "CropGrowth"
 uuid = "31d5a150-c0a8-4571-b61a-37582b26e8d4"
-version = "1.0.0"
+version = "0.0.1"
 authors = ["jeffersonparil@gmail.com"]
 
 [deps]
@@ -36,7 +36,7 @@ ProgressMeter = "1.11.0"
 Random = "1.11.0"
 StatsBase = "0.34.8"
 UnicodePlots = "3.8.1"
-julia = "1.12.1"
+julia = "1.12"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
