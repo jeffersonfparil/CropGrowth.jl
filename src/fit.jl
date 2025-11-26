@@ -1,49 +1,57 @@
 """
-    fit(df::DataFrame; 
-        A = Dict(:init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])),
-        K = Dict(:init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])),
-        C::Dict=Dict(:init=>1.0, :lower=>1.0, :upper=>1.0),
-        Q::Dict=Dict(:init=>1.0, :lower=>1.0, :upper=>1.0),
-        B::Dict=Dict(:init=>1.0, :lower=>0.0, :upper=>10.0),
-        v::Dict=Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0),
-        min_t::Int64=3, 
-        perc_of_final::Vector{Float64}=[0.5, 0.9], 
-        fit_statistic::String="R²", 
-        maxiters::Int64=10_000, 
-        seed::Int64=42, 
-        show_plots::Bool=false, 
-        verbose::Bool=false) :: DataFrame
+    fitgrowthmodels(
+        df::DataFrame;
+        A = Dict(
+            :init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
+            :lower=>0.0,
+            :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
+        ),
+        K = Dict(
+            :init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
+            :lower=>0.0,
+            :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
+        ),
+        C = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0),
+        Q = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0),
+        B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0),
+        v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0),
+        min_t::Int64 = 3,
+        perc_of_final::Vector{Float64} = [0.5, 0.9],
+        fit_statistic::String = "R²",
+        maxiters::Int64 = 10_000,
+        seed::Int64 = 42,
+        show_plots::Bool = false,
+        verbose::Bool = false,
+    )::Tuple{DataFrame, Vector{String}}
 
-Fits growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters and statistics.
+Fits generalized logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified percentages of the final value.
 
 # Arguments
-- `df::DataFrame`: Input data containing the required columns and at least one trait column.
-- `A::Dict`: Search space for the parameter `A` (lower asymptote). Contains `:init`, `:lower`, and `:upper` keys. (Default is set to the minimum and maximum of the trait column with init=minimum)
-- `K::Dict`: Search space for the parameter `K` (upper asymptote). Contains `:init`, `:lower`, and `:upper` keys. (Default is set to the minimum and 2*maximum of the trait column with init=maximum)
-- `C::Dict`: Search space for the parameter `C`. Contains `:init`, `:lower`, and `:upper` keys. (Default is fixed to 1.0)
-- `Q::Dict`: Search space for the parameter `Q`. Contains `:init`, `:lower`, and `:upper` keys. (Default is fixed to 1.0)
-- `B::Dict`: Search space for the parameter `B` (growth rate). Contains `:init`, `:lower`, and `:upper` keys. (Default is set to init=1.0, lower=0.0, upper=10.0)
-- `v::Dict`: Search space for the parameter `v` (asymmetry parameter). Contains `:init`, `:lower`, and `:upper` keys. (Default is set to init=1.0, lower=1e-5, upper=10.0)
-- `min_t::Int64=3`: Minimum number of time points required to fit the growth model for a specific combination of entry, site, replication, and growing period.
-- `perc_of_final::Vector{Float64}=[0.5, 0.9]`: Percentages of the final value for which the time to reach these percentages will be calculated.
-- `fit_statistic::String="R²"`: The fit statistic to be used for evaluating the model. Must be one of `["R²", "RMSE", "MSE", "MAE", "ρ"]`.
-- `maxiters::Int64=10_000`: Maximum number of iterations allowed for the optimization process.
-- `seed::Int64=42`: Random seed for reproducibility.
-- `show_plots::Bool=false`: Show fitted growth curve plots?
-- `verbose::Bool=false`: Show progress bar?
+- `df::DataFrame`: Input data containing the required columns specified in `REQUIRED_COLUMNS` and at least one trait column.
+- `A::Dict`: Search space for the parameter `A` (lower asymptote). Contains `:init`, `:lower`, and `:upper` keys. Defaults to the minimum and maximum of the trait column with `init=minimum`.
+- `K::Dict`: Search space for the parameter `K` (upper asymptote). Contains `:init`, `:lower`, and `:upper` keys. Defaults to the minimum and 2×maximum of the trait column with `init=maximum`.
+- `C::Dict`: Search space for the parameter `C`. Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=1.0`, `upper=1.0`.
+- `Q::Dict`: Search space for the parameter `Q`. Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=1.0`, `upper=1.0`.
+- `B::Dict`: Search space for the parameter `B` (growth rate). Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=0.0`, `upper=10.0`.
+- `v::Dict`: Search space for the parameter `v` (asymmetry parameter). Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=1e-5`, `upper=10.0`.
+- `min_t::Int64`: Minimum number of time points required to fit the growth model for a specific combination of entry, site, replication, and growing period. Defaults to `3`.
+- `perc_of_final::Vector{Float64}`: Percentages of the final value for which the time to reach these percentages will be calculated. Defaults to `[0.5, 0.9]`.
+- `fit_statistic::String`: The fit statistic to be used for evaluating the model. Must be one of `["R²", "RMSE", "MSE", "MAE", "ρ"]`. Defaults to `"R²"`.
+- `maxiters::Int64`: Maximum number of iterations allowed for the optimization process. Defaults to `10_000`.
+- `seed::Int64`: Random seed for reproducibility. Defaults to `42`.
+- `show_plots::Bool`: Whether to show fitted growth curve plots. Defaults to `false`.
+- `verbose::Bool`: Whether to display progress and additional information during the fitting process. Defaults to `false`.
 
 # Returns
-- `DataFrame`: A `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
+- `DataFrame`: A `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, maximum value of the growth model (`y_max`), and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
 
 # Notes
 - The input `DataFrame` must contain the required columns specified in the global variable `REQUIRED_COLUMNS`, as well as at least one additional trait column.
 - If the `DataFrame` contains more than one trait column, only the first trait column will be used.
 - Combinations with fewer than `min_t` time points will be skipped, and a warning will be issued.
-- The function uses a progress bar to indicate the fitting process.
-- `y_max` may be unexpectedly high if `C` is fitted freely which may indicate a simple linear growth rather than a logistic growth pattern.
+- The function uses a progress bar to indicate the fitting process if `verbose=true`.
 
 # Details
-
 Fits a generalized logistic growth model to the data using the following equation:
 
 ```math
@@ -69,7 +77,7 @@ Additional information are provided in the output `DataFrame`:
 ```jldoctest; setup = :(using CropGrowth, DataFrames, StatsBase)
 julia> df = simulate(n_entries=5, seed=42);
 
-julia> df_out = fitgrowthmodels(df);
+julia> df_out, skipped_combinations = fitgrowthmodels(df);
 
 julia> length(unique(df.entries)) == length(unique(df_out.entries))
 true
@@ -116,7 +124,7 @@ function fitgrowthmodels(
     seed::Int64 = 42,
     show_plots::Bool = false,
     verbose::Bool = false,
-)::DataFrame
+)::Tuple{DataFrame,Vector{String}}
     # df::DataFrame = simulate(); min_t::Int64=3; perc_of_final::Vector{Float64} = [0.5, 0.9]; fit_statistic::String = "R²"; maxiters::Int64 = 10_000; seed::Int64 = 42; show_plots::Bool=false; verbose::Bool=false
     # A = Dict(:init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); K = Dict(:init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); C = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); Q = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0); v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0)
     if !all(x -> x ∈ names(df), REQUIRED_COLUMNS)
@@ -251,7 +259,9 @@ function fitgrowthmodels(
     end
     if verbose
         ProgressMeter.finish!(pb)
-        println("Skipped combinations due to insufficient data points:")
+        println(
+            "Skipped $(length(skipped_combinations)) combinations due to insufficient data points:",
+        )
         for combination in skipped_combinations
             println(" - $combination")
         end
@@ -289,5 +299,5 @@ function fitgrowthmodels(
     )
     sort!(df_out, [:entries, :sites, :replications, :growing_periods])
     sort!(df_out, "R²", rev = false)
-    return df_out
+    return (df_out, skipped_combinations)
 end
