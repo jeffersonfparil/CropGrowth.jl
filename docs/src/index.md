@@ -1,6 +1,11 @@
 # CropGrowth.jl
 
-CropGrowth.jl is a Julia package for modelling crop growth curves using the generalised logistic function:
+```@contents
+Pages = ["index.md"]
+Depth = 3
+```
+
+[CropGrowth.jl]([CropGrowth.jl](https://github.com/jeffersonfparil/CropGrowth.jl)) is a [Julia](https://julialang.org/) package for modelling crop growth curves using the [generalised logistic function](https://en.wikipedia.org/wiki/Generalised_logistic_function):
 
 ```math
 y(t) = {A + {{K-A} \over {C + (Qe^{-Bt})^{1/v}}}}
@@ -27,19 +32,9 @@ To solve for ``t`` at specific ``y``:
 t(y) = -{{1} \over {B}} \log {\left( { {{1} \over {Q}} \left( \left( {K - A} \over {y - A} \right)^v - C \right) } \right) }
 ```
 
-
-The `GenomicBreeding` module provides a comprehensive suite of tools for genomic prediction, genome-wide association studies (GWAS), and data handling in genomic breeding. It integrates functionalities from `GenomicBreedingCore`, `GenomicBreedingIO`, `GenomicBreedingModels`, and `GenomicBreedingPlots` to offer efficient and scalable solutions for genetic data analysis and visualisation.
-
-```@contents
-Pages = ["index.md"]
-Depth = 3
-```
-
 ## Installation
 
-We designed [GenomicBreeding.jl](https://github.com/GenomicBreeding/GenomicBreeding.jl) to work on an HPC running Linux (the various components, i.e. [GenomicBreedingCore.jl](https://github.com/GenomicBreeding/GenomicBreedingCore.jl), [GenomicBreedingIO.jl](https://github.com/GenomicBreeding/GenomicBreedingIO.jl), [GenomicBreedingModels.jl](https://github.com/GenomicBreeding/GenomicBreedingModels.jl), and [GenomicBreedingPlots.jl](https://github.com/GenomicBreeding/GenomicBreedingPlots.jl) work on a single Linux PC too).
-
-First, if you have not yet, please install [Julia](https://julialang.org/) (the latest version as we aim to update this package for the latest Julia release):
+Please install the latest version of [Julia](https://julialang.org/) (we aim to update [CropGrowth.jl]([CropGrowth.jl](https://github.com/jeffersonfparil/CropGrowth.jl)) for the latest Julia release):
 
 ```shell
 curl -fsSL https://install.julialang.org | sh

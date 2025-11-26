@@ -61,5 +61,4 @@ mean(df_out_0.R²)
 mean(df_out_C.R²)
 mean(df_out_Q.R²)
 mean(df_out_CQ.R²)
-
 ```
