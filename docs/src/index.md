@@ -2,30 +2,30 @@
 
 CropGrowth.jl is a Julia package for modelling crop growth curves using the generalised logistic function:
 
-$$
+```math
 y(t) = {A + {{K-A} \over {C + (Qe^{-Bt})^{1/v}}}}
-$$
+```
 
 where:
 
-- $y(t)$: biomass at time $t$ (not part of the struct)
-- $A$: lower asymptote (initial or minimum biomass)
-- $K$: positively affects the upper asymptote. This be the final or maximum biomass if:
-    + $C = 1.00$, since:
-    + $y_{max} = A + (K-A)/C^{1/v}$, then 
-    + $y_{max} = A + K - A$, therefore: 
-    + $y_{max} = K$
-- $C$: negatively affects the final or maximum biomass
-- $Q$: negatively affects initial or minimum biomass
-- $e$: Euler's number (~2.71828)
-- $B$: growth rate
-- $v$: asymmetry parameter ($v ≥ 0$; small values: fast growth early; large values: fast growth later)
+- ``y(t)``: biomass at time ``t`` (not part of the struct)
+- ``A``: lower asymptote (initial or minimum biomass)
+- ``K``: positively affects the upper asymptote. This be the final or maximum biomass if:
+    + ``C = 1.00``, since:
+    + ``y_{max} = A + (K-A)/C^{1/v}``, then 
+    + ``y_{max} = A + K - A``, therefore: 
+    + ``y_{max} = K``
+- ``C``: negatively affects the final or maximum biomass
+- ``Q``: negatively affects initial or minimum biomass
+- ``e``: Euler's number (~2.71828)
+- ``B``: growth rate
+- ``v``: asymmetry parameter (``v ≥ 0``; small values: fast growth early; large values: fast growth later)
 
-To solve for $t$ at specific $y$:
+To solve for ``t`` at specific ``y``:
 
-$$
+```math
 t(y) = -{{1} \over {B}} \log {\left( { \left( {K - A} \over {y - A} \right)^v - C } \over {Q} \right) }
-$$
+```
 
 
 The `GenomicBreeding` module provides a comprehensive suite of tools for genomic prediction, genome-wide association studies (GWAS), and data handling in genomic breeding. It integrates functionalities from `GenomicBreedingCore`, `GenomicBreedingIO`, `GenomicBreedingModels`, and `GenomicBreedingPlots` to offer efficient and scalable solutions for genetic data analysis and visualisation.
