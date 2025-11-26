@@ -48,10 +48,10 @@ $$
 ```julia
 using CropGrowth, StatsBase
 df = simulate(n_entries=5, n_sites=1, n_replications=1, n_growing_periods=1, n_time_points_per_growing_period=5, seed=123)
-df_out_0 = fitgrowthmodels(df, show_plots=true)
-df_out_C = fitgrowthmodels(df, C=Dict(:init=>1.0, :lower=>0.0, :upper=>100.0), show_plots=true)
-df_out_Q = fitgrowthmodels(df, Q=Dict(:init=>1.0, :lower=>0.0, :upper=>100.0), show_plots=true)
-df_out_CQ = fitgrowthmodels(
+df_out_0, skipped_combinations_0 = fitgrowthmodels(df, show_plots=true)
+df_out_C, skipped_combinations_C = fitgrowthmodels(df, C=Dict(:init=>1.0, :lower=>0.0, :upper=>100.0), show_plots=true)
+df_out_Q, skipped_combinations_Q = fitgrowthmodels(df, Q=Dict(:init=>1.0, :lower=>0.0, :upper=>100.0), show_plots=true)
+df_out_CQ, skipped_combinations_CQ = fitgrowthmodels(
     df,
     C=Dict(:init=>1.0, :lower=>0.0, :upper=>5.0),
     Q=Dict(:init=>1.0, :lower=>0.0, :upper=>5.0),
