@@ -24,7 +24,7 @@ where:
 To solve for ``t`` at specific ``y``:
 
 ```math
-t(y) = -{{1} \over {B}} \log {\left( { \left( {K - A} \over {y - A} \right)^v - C } \over {Q} \right) }
+t(y) = -{{1} \over {B}} \log {\left( { {{1} \over {Q}} \left( {K - A} \over {y - A} \right)^v - C } \right) }
 ```
 
 
