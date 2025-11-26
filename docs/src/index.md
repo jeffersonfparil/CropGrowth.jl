@@ -5,7 +5,7 @@ Pages = ["index.md"]
 Depth = 3
 ```
 
-[CropGrowth.jl]([CropGrowth.jl](https://github.com/jeffersonfparil/CropGrowth.jl)) is a [Julia](https://julialang.org/) package for modelling crop growth curves using the [generalised logistic function](https://en.wikipedia.org/wiki/Generalised_logistic_function):
+[CropGrowth.jl](https://github.com/jeffersonfparil/CropGrowth.jl) is a [Julia](https://julialang.org/) package for modelling crop growth curves using the [generalised logistic function](https://en.wikipedia.org/wiki/Generalised_logistic_function):
 
 ```math
 y(t) = {A + {{K-A} \over {C + (Qe^{-Bt})^{1/v}}}}
@@ -34,7 +34,7 @@ t(y) = -{{1} \over {B}} \log {\left( { {{1} \over {Q}} \left( \left( {K - A} \ov
 
 ## Installation
 
-Please install the latest version of [Julia](https://julialang.org/) (we aim to update [CropGrowth.jl]([CropGrowth.jl](https://github.com/jeffersonfparil/CropGrowth.jl)) for the latest Julia release):
+Please install the latest version of [Julia](https://julialang.org/) (we aim to update [CropGrowth.jl](https://github.com/jeffersonfparil/CropGrowth.jl) for the latest Julia release):
 
 ```shell
 curl -fsSL https://install.julialang.org | sh
