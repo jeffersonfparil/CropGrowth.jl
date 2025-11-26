@@ -40,7 +40,7 @@ where:
 To solve for $t$ at specific $y$:
 
 $$
-t(y) = -{{1} \over {B}} \log {\left( { {{1} \over {Q}} \left( {K - A} \over {y - A} \right)^v - C } \right) }
+t(y) = -{{1} \over {B}} \log {\left( { {{1} \over {Q}} \left( \left( {K - A} \over {y - A} \right)^v - C \right) } \right) }
 $$
 
 ## Examples
