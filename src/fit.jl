@@ -207,7 +207,7 @@ function fitgrowthmodels(
                     )
                     combination = "entry=\"$entry\"; site=\"$site\"; replication=\"$replication\"; growing_period=\"$growing_period\""
                     if length(idx) < min_t
-                        @warn "Not enough data points (minimum t = $min_t) to fit growth model for $combination. Skipping."
+                        # @warn "Not enough data points (minimum t = $min_t) to fit growth model for $combination. Skipping."
                         push!(skipped_combinations, combination)
                         continue
                     end
@@ -260,7 +260,7 @@ function fitgrowthmodels(
     if verbose
         ProgressMeter.finish!(pb)
         println(
-            "Skipped $(length(skipped_combinations)) combinations due to insufficient data points.",
+            "Skipped $(length(skipped_combinations)) combinations due to insufficient data points (i.e. t < $min_t).",
         )
     end
     # Output dataFrame and sort columns sensibly
