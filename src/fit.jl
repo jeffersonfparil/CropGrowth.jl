@@ -260,11 +260,8 @@ function fitgrowthmodels(
     if verbose
         ProgressMeter.finish!(pb)
         println(
-            "Skipped $(length(skipped_combinations)) combinations due to insufficient data points:",
+            "Skipped $(length(skipped_combinations)) combinations due to insufficient data points.",
         )
-        for combination in skipped_combinations
-            println(" - $combination")
-        end
     end
     # Output dataFrame and sort columns sensibly
     df_out = DataFrame(fitted_parameters)
@@ -298,6 +295,5 @@ function fitgrowthmodels(
         ]),
     )
     sort!(df_out, [:entries, :sites, :replications, :growing_periods])
-    sort!(df_out, "R²", rev = false)
     return (df_out, skipped_combinations)
 end
