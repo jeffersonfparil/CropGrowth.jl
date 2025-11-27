@@ -62,7 +62,7 @@ where:
 
 - ``y(t)``: biomass at time ``t``
 - ``A``: lower asymptote (initial or minimum biomass)
-- ``K``: positively affects the upper asymptote (can be the final or maximum biomass if ``C = 1.00``, since ``y_max = A + (K-A)/C^(1/v)``, then ``y_max = A + K - A``, therefore: ``y_max = K``)
+- ``K``: positively affects the upper asymptote (can be the final or maximum biomass if ``C = 1.00``, since ``y_{max} = A + (K-A)/C^(1/v)``, then ``y_{max} = A + K - A``, therefore: ``y_{max} = K``)
 - ``C``: negatively affects the final or maximum biomass
 - ``Q``: negatively affects initial or minimum biomass
 - ``e``: Euler's number (~2.71828)
@@ -70,7 +70,7 @@ where:
 - ``v``: asymmetry parameter (``v ≥ 0``; small values: fast growth early; large values: fast growth later)
 
 Additional information are provided in the output `DataFrame`:
-- Maximum value of the growth model (``y_max = A + (K-A)/C^(1/v)``)
+- Maximum value of the growth model (``y_{max} = A + (K-A)/C^(1/v)``)
 - One of the following fit statistic such as R² (default), RMSE, MSE, MAE, and Pearson's correlation coefficient (ρ)
 
 # Example

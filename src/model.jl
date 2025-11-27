@@ -11,7 +11,7 @@ where:
 
 - ``y(t)``: biomass at time ``t`` (not part of the struct)
 - ``A``: lower asymptote (initial or minimum biomass)
-- ``K``: positively affects the upper asymptote (can be the final or maximum biomass if ``C = 1.00``, since ``y_max = A + (K-A)/C^(1/v)``, then ``y_max = A + K - A``, therefore: ``y_max = K``)
+- ``K``: positively affects the upper asymptote (can be the final or maximum biomass if ``C = 1.00``, since ``y_{max} = A + (K-A)/C^(1/v)``, then ``y_{max} = A + K - A``, therefore: ``y_{max} = K``)
 - ``C``: negatively affects the final or maximum biomass
 - ``Q``: negatively affects initial or minimum biomass
 - ``e``: Euler's number (~2.71828)
@@ -20,11 +20,12 @@ where:
 
 Additional information are provided in the struct:
 
-- ``y_max``: maximum value of the growth model (``y_max = A + (K-A)/C^(1/v)``)
-- ``fit_statistics``: a dictionary containing fit statistics such as R², RMSE, MSE, MAE, and Pearson's correlation coefficient (ρ)
+- `y_max`: maximum value of the growth model (``y_{max} = A + (K-A)/C^(1/v)``)
+- `fit_statistics`: a dictionary containing fit statistics such as R², RMSE, MSE, MAE, and Pearson's correlation coefficient (ρ)
 
 # Constructor
 
+```julia
 GrowthModel(;
     A::Float64,
     K::Float64,
@@ -35,9 +36,10 @@ GrowthModel(;
     fit_statistics::Dict{String,Float64} = Dict(""=>NaN),
     ϵ::Float64 = 1e-12,
 )
+```
 
 # Notes:
-- The struct includes a constructor that automatically calculates ``y_max`` based on the provided parameters.
+- The struct includes a constructor that automatically calculates `y_max` based on the provided parameters.
 - The `fit_statistics` field is optional and defaults to a dictionary with a single entry of an empty string key and `NaN` value.
 - A small epsilon value (`ϵ`) is added to the calculation of `y_max` to prevent division by zero errors.
 
@@ -146,7 +148,7 @@ Computes the generalized logistic function for a given vector of time points `t`
 
 # Keyword Arguments
 - `A::Float64` (default: `0.0`): lower asymptote (initial or minimum biomass)
-- `K::Float64` (default: `1.0`): upper asymptote (can be the final or maximum biomass if ``C = 1.00``, since ``y_max = A + (K-A)/C^(1/v)``, then ``y_max = A + K - A``, therefore: ``y_max = K``)
+- `K::Float64` (default: `1.0`): upper asymptote (can be the final or maximum biomass if ``C = 1.00``, since ``y_{max} = A + (K-A)/C^(1/v)``, then ``y_{max} = A + K - A``, therefore: ``y_{max} = K``)
 - `C::Float64` (default: `1.0`): negatively affects the final or maximum biomass
 - `Q::Float64` (default: `1.0`): negatively affects initial or minimum biomass
 - `B::Float64` (default: `1.0`): growth rate
@@ -304,7 +306,7 @@ function modelgrowth(;
     end
     opt_fun(θ, t) = mean(
         (
-            y - generalisedlogistic(
+            y .- generalisedlogistic(
                 t,
                 A = θ[1],
                 K = θ[2],
@@ -397,9 +399,9 @@ Calculate the time required for a growth model to reach a proportion `p` of its 
 - `Vector{Float64}`: A vector of times corresponding to each proportion in `p`.
 
 # Details
-- The function computes the maximum value of the growth model (``y_max = A + (K-A)/C^(1/v)``) based on its parameters.
-- For each proportion in `p`, the corresponding value of `y` is calculated as `p * y_max`.
-- The time required to reach each `y` is computed using the generalised logistic growth model formula, which involves logarithmic and complex arithmetic operations.
+- The function computes the maximum value of the growth model (``y_{max} = A + (K-A)/C^(1/v)``) based on its parameters.
+- For each proportion in ``p``, the corresponding value of ``y`` is calculated as ``p * y_{max}``.
+- The time required to reach each ``y`` is computed using the generalised logistic growth model formula, which involves logarithmic and complex arithmetic operations.
 - The result is the real part of the computed times.
 - The formula is:
 ```math
