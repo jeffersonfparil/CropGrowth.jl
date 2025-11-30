@@ -1,5 +1,14 @@
 """
-    struct GrowthModel
+    mutable struct GrowthModel
+        A::Float64
+        K::Float64
+        C::Float64
+        Q::Float64
+        B::Float64
+        v::Float64
+        y_t0::Float64
+        y_max::Float64
+        fit_statistics::Dict{String,Float64}
 
 Holds parameters for the generalized logistic growth model:
 
@@ -20,6 +29,7 @@ where:
 
 Additional information are provided in the struct:
 
+- `y_t0`: value of the growth model at time ``t = 0``
 - `y_max`: maximum value of the growth model (``y_{max} = A + (K-A)/C^(1/v)``)
 - `fit_statistics`: a dictionary containing fit statistics such as R², RMSE, MSE, MAE, and Pearson's correlation coefficient (ρ)
 
@@ -61,6 +71,7 @@ mutable struct GrowthModel
     Q::Float64
     B::Float64
     v::Float64
+    y_t0::Float64
     y_max::Float64
     fit_statistics::Dict{String,Float64}
     function GrowthModel(;
@@ -73,8 +84,9 @@ mutable struct GrowthModel
         fit_statistics::Dict{String,Float64} = Dict(""=>NaN),
         ϵ::Float64 = 1e-12,
     )
+        y_t0 = A .+ ((K - A) ./ (C .+ (Q .* exp.(-B .* 0.0))) .^ (1/v))
         y_max = A + (K-A)/(C^(1/v) + ϵ)
-        new(A, K, C, Q, B, v, y_max, fit_statistics)
+        new(A, K, C, Q, B, v, y_t0, y_max, fit_statistics)
     end
 end
 
@@ -372,6 +384,7 @@ function modelgrowth(;
         println("Q = $(growth_model.Q)")
         println("B = $(growth_model.B)")
         println("v = $(growth_model.v)")
+        println("y_t0 = $(growth_model.y_t0)")
         println("y_max = $(growth_model.y_max)")
         println("Fit statistics:")
         for (stat_name, stat_value) in growth_model.fit_statistics

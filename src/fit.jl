@@ -43,7 +43,7 @@ Fits generalized logistic growth models to the data provided in the input `DataF
 - `verbose::Bool`: Whether to display progress and additional information during the fitting process. Defaults to `false`.
 
 # Returns
-- `DataFrame`: A `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, maximum value of the growth model (`y_max`), and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
+- `DataFrame`: A `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
 
 # Notes
 - The input `DataFrame` must contain the required columns specified in the global variable `REQUIRED_COLUMNS`, as well as at least one additional trait column.
@@ -70,7 +70,8 @@ where:
 - ``v``: asymmetry parameter (``v ≥ 0``; small values: fast growth early; large values: fast growth later)
 
 Additional information are provided in the output `DataFrame`:
-- Maximum value of the growth model (``y_{max} = A + (K-A)/C^(1/v)``)
+- `y_t0` is the value of the growth model at time ``t = 0``
+- `y_max` is the maximum value of the growth model (``y_{max} = A + (K-A)/C^(1/v)``)
 - One of the following fit statistic such as R² (default), RMSE, MSE, MAE, and Pearson's correlation coefficient (ρ)
 
 # Example
@@ -179,6 +180,7 @@ function fitgrowthmodels(
         "Q" => Float64[],
         "B" => Float64[],
         "v" => Float64[],
+        "y_t0" => Float64[],
         "y_max" => Float64[],
         fit_statistic => Float64[],
     )
@@ -238,6 +240,8 @@ function fitgrowthmodels(
                     fitted_parameters["Q"] = vcat(fitted_parameters["Q"], growth_model.Q)
                     fitted_parameters["B"] = vcat(fitted_parameters["B"], growth_model.B)
                     fitted_parameters["v"] = vcat(fitted_parameters["v"], growth_model.v)
+                    fitted_parameters["y_t0"] =
+                        vcat(fitted_parameters["y_t0"], growth_model.y_t0)
                     fitted_parameters["y_max"] =
                         vcat(fitted_parameters["y_max"], growth_model.y_max)
                     fitted_parameters[fit_statistic] = vcat(
@@ -277,6 +281,7 @@ function fitgrowthmodels(
         :Q,
         :B,
         :v,
+        :y_t0,
         :y_max,
         Symbol(fit_statistic),
         Not([
