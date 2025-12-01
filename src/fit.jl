@@ -43,7 +43,9 @@ Fits generalized logistic growth models to the data provided in the input `DataF
 - `verbose::Bool`: Whether to display progress and additional information during the fitting process. Defaults to `false`.
 
 # Returns
-- `DataFrame`: A `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
+- `Tuple{DataFrame, Vector{String}}`: 
+    - The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
+    - The second element is a `Vector{String}` containing the combinations that were skipped due to insufficient data points.
 
 # Notes
 - The input `DataFrame` must contain the required columns specified in the global variable `REQUIRED_COLUMNS`, as well as at least one additional trait column.
