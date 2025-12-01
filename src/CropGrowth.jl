@@ -3,7 +3,7 @@ module CropGrowth
 using Random, LinearAlgebra, StatsBase, Optimization, OptimizationBBO
 using DataFrames, CSV
 using Dates, ProgressMeter
-using UnicodePlots, CairoMakie, ColorSchemes
+using UnicodePlots
 
 const REQUIRED_COLUMNS =
     ["entries", "sites", "replications", "growing_periods", "time_points"]
