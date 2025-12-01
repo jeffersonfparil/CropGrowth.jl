@@ -26,7 +26,7 @@ bibliography: paper.bib
 
 # Summary
 
-`CropGrowth.jl` is a Julia package designed for simulating and fitting crop growth models using logistic curves. It provides tools for researchers and agronomists to analyze biomass accumulation over time, leveraging flexible parameterisation and statistical tools for model fitting.
+`CropGrowth.jl` is a Julia package for fitting crop growth models using logistic curves. It provides tools for researchers and agronomists to analyse crop growth over time, leveraging flexible parameterisation and statistical tools for model fitting.
 
 # Statement of need
 
@@ -61,7 +61,7 @@ $$
 
 # Conclusion
 
-`CropGrowth.jl` simplifies the modelling of crop growth dynamics, making it a valuable tool for agricultural research. For more details, visit the [documentation](https://jeffersonfparil.github.io/CropGrowth.jl/stable/).
+`CropGrowth.jl` simplifies the modelling of crop growth dynamics, making it a valuable tool for agricultural research. For more details, visit the documentations ([stable version](https://jeffersonfparil.github.io/CropGrowth.jl/stable/) or [development version](https://jeffersonfparil.github.io/CropGrowth.jl/dev/)).
 
 # Acknowledgements
 
