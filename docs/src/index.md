@@ -15,7 +15,7 @@ where:
 
 - ``y(t)``: biomass at time ``t`` (not part of the struct)
 - ``A``: lower asymptote (initial or minimum biomass)
-- ``K``: positively affects the upper asymptote. This be the final or maximum biomass if:
+- ``K``: positively affects the upper asymptote. This is the final or maximum biomass if:
     + ``C = 1.00``, since:
     + ``y_{max} = A + (K-A)/C^{1/v}``, then 
     + ``y_{max} = A + K - A``, therefore: 
