@@ -50,7 +50,7 @@ Fits generalized logistic growth models to the data provided in the input `DataF
 # Notes
 - The input `DataFrame` must contain the required columns specified in the global variable `REQUIRED_COLUMNS = ["entries", "sites", "replications", "growing_periods", "time_points"]`, as well as at least one additional trait column.
 - If the `DataFrame` contains more than one trait column, only the first trait column will be used.
-- Combinations with fewer than `min_t` time points will be skipped, and a warning will be issued.
+- Combinations with fewer than `min_t` time points will be skipped.
 - The function uses a progress bar to indicate the fitting process if `verbose=true`.
 
 # Details

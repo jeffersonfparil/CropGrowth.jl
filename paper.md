@@ -4,15 +4,22 @@ tags:
   - Julia
   - crop growth modelling
   - agronomy
-  - crop production
   - agriculture
 authors:
   - name: Jefferson F. Paril
     orcid: 0000-0002-5693-4123
     affiliation: "1"
+  - name: Noel O. I. Cogan
+    orcid: 0000-0003-1074-8998
+    affiliation: "1,2"
+  - name: M. Michelle Malmberg
+    orcid: 0000-0002-6351-5904
+    affiliation: "1"
 affiliations:
- - name: Agriculture Victoria, Bundoora, Victoria, Australia
+ - name: Agriculture Victoria, AgriBio, Centre for AgriBioscience, 5 Ring Rd, Bundoora, VIC, Australia
    index: 1
+ - name: School of Applied Systems Biology, LaTrobe University, Bundoora, VIC, Australia
+   index: 2
 date: 01 December 2025
 bibliography: paper.bib
 ---
@@ -23,7 +30,7 @@ bibliography: paper.bib
 
 # Statement of need
 
-Understanding and predicting crop growth dynamics is critical for optimising agricultural productivity and ensuring food security. Conventional approaches to crop growth modelling typically rely on numerous, disparate tools, compelling users to assemble *ad hoc* solutions that are neither flexible nor intuitive. `CropGrowth.jl` addresses these challenges by providing a lightweight, efficient, and user-friendly solution for modelling crop growth using logistic curves. 
+Understanding and predicting crop growth dynamics is critical for optimising agricultural productivity and ensuring food security. Conventional approaches to crop growth modelling typically rely on numerous disparate tools, compelling users to assemble *ad hoc* solutions that are neither flexible nor intuitive. `CropGrowth.jl` addresses these challenges by providing a lightweight, efficient, and user-friendly solution for modelling crop growth using logistic curves. 
 
 This package offers significant utility for agronomists, researchers, and students seeking to characterise crop growth responses across one or more genotypes using field trial data, which may encompass multiple years, environments, genotypes, and treatment factors. By leveraging Julia's high-performance capabilities [@Bezanson], `CropGrowth.jl` enables rapid prototyping and analysis, making it an essential tool for modern agricultural research.
 
