@@ -23,7 +23,7 @@ bibliography: paper.bib
 
 # Statement of need
 
-Understanding and predicting crop growth dynamics is critical for optimizing agricultural productivity and ensuring food security. Traditional approaches to modelling crop growth often involve complex tools that may lack flexibility or require significant computational resources. `CropGrowth.jl` addresses these challenges by providing a lightweight, efficient, and user-friendly solution for modelling crop growth using logistic curves. 
+Understanding and predicting crop growth dynamics is critical for optimising agricultural productivity and ensuring food security. Traditional approaches to modelling crop growth often involve complex tools that may lack flexibility or require significant computational resources. `CropGrowth.jl` addresses these challenges by providing a lightweight, efficient, and user-friendly solution for modelling crop growth using logistic curves. 
 
 This package is particularly valuable for agronomists, researchers, and students who need to simulate crop growth, fit models to experimental data, and visualize results. By leveraging Julia's high-performance capabilities [@Bezanson], `CropGrowth.jl` enables rapid prototyping and analysis, making it an essential tool for modern agricultural research.
 
