@@ -27,7 +27,7 @@
 Fits generalized logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified percentages of the final value.
 
 # Arguments
-- `df::DataFrame`: Input data containing the required columns specified in `REQUIRED_COLUMNS` and at least one trait column.
+- `df::DataFrame`: Input data containing the required columns specified in `REQUIRED_COLUMNS = ["entries", "sites", "replications", "growing_periods", "time_points"]` and at least one trait column.
 - `A::Dict`: Search space for the parameter `A` (lower asymptote). Contains `:init`, `:lower`, and `:upper` keys. Defaults to the minimum and maximum of the trait column with `init=minimum`.
 - `K::Dict`: Search space for the parameter `K` (upper asymptote). Contains `:init`, `:lower`, and `:upper` keys. Defaults to the minimum and 2×maximum of the trait column with `init=maximum`.
 - `C::Dict`: Search space for the parameter `C`. Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=1.0`, `upper=1.0`.
@@ -48,7 +48,7 @@ Fits generalized logistic growth models to the data provided in the input `DataF
     - The second element is a `Vector{String}` containing the combinations that were skipped due to insufficient data points.
 
 # Notes
-- The input `DataFrame` must contain the required columns specified in the global variable `REQUIRED_COLUMNS`, as well as at least one additional trait column.
+- The input `DataFrame` must contain the required columns specified in the global variable `REQUIRED_COLUMNS = ["entries", "sites", "replications", "growing_periods", "time_points"]`, as well as at least one additional trait column.
 - If the `DataFrame` contains more than one trait column, only the first trait column will be used.
 - Combinations with fewer than `min_t` time points will be skipped, and a warning will be issued.
 - The function uses a progress bar to indicate the fitting process if `verbose=true`.

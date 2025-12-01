@@ -112,10 +112,10 @@ Reads a delimited file into a `DataFrame` and validates its structure.
 
 # Throws
 - `ArgumentError`: If the file does not exist.
-- `ArgumentError`: If any of the required columns, including `trait_name`, are missing.
+- `ArgumentError`: If any of the `REQUIRED_COLUMNS = ["entries", "sites", "replications", "growing_periods", "time_points"]`, including `trait_name`, are missing.
 
 # Notes
-- The function expects the file to contain specific required columns, defined in `REQUIRED_COLUMNS`, along with the column specified by `trait_name`.
+- The function expects the file to contain specific `REQUIRED_COLUMNS = ["entries", "sites", "replications", "growing_periods", "time_points"]`, defined in `REQUIRED_COLUMNS`, along with the column specified by `trait_name`.
 
 # Example
 ```jldoctest; setup = :(using CropGrowth, DataFrames, CSV)
