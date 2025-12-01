@@ -27,7 +27,7 @@ Understanding and predicting crop growth dynamics is critical for optimising agr
 
 This package offers significant utility for agronomists, researchers, and students seeking to characterise crop growth responses across one or more genotypes using field trial data, which may encompass multiple years, environments, genotypes, and treatment factors. By leveraging Julia's high-performance capabilities [@Bezanson], `CropGrowth.jl` enables rapid prototyping and analysis, making it an essential tool for modern agricultural research.
 
-This package leverages `Optimization.jl` [@Vaibhav] to fit the logistic models, `DataFrames.jl` [@Bouchet-Valat] for efficient data handling, `CSV.jl` [@JuliaData] for file input and output, `ProgressMeter.jl` [@Holy] for status monitoring, and `UnicodePlots.jl` [@Danisch] for simple plotting.
+This package leverages `Optimization.jl` [@Vaibhav] to fit the logistic models, `DataFrames.jl` [@Bouchet-Valat] for efficient data handling, `CSV.jl` [@JuliaDataContributors] for file input and output, `ProgressMeter.jl` [@HolyTim] for status monitoring, and `UnicodePlots.jl` [@PlotsContributors] for simple plotting.
 
 # Mathematical model
 
@@ -62,6 +62,6 @@ $$
 
 # Acknowledgements
 
-We acknowledge the developers and contributors of the packages used in `CropGrowth.jl`. The complete list is found in the Project.toml of the repository.
+We acknowledge the developers and contributors of the packages used in `CropGrowth.jl`. The complete list is found in the [Project.toml](https://github.com/jeffersonfparil/CropGrowth.jl/blob/main/Project.toml) of the repository.
 
 # References
