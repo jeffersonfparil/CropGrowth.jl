@@ -79,7 +79,7 @@ df_out = fitgrowthmodels(df, verbose=true)
 
 ## Implementation details
 
-The main function, `fitgrowthmodels` fits generalized logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified percentages of the final value. The complete function signature is:
+The main function, `fitgrowthmodels` fits generalized logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified fraction of the final value. The complete function signature is:
 
 ```julia
 fitgrowthmodels(
@@ -99,7 +99,7 @@ fitgrowthmodels(
   B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0),
   v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0),
   min_t::Int64 = 3,
-  perc_of_final::Vector{Float64} = [0.5, 0.9],
+  frac_of_final::Vector{Float64} = [0.5, 0.9],
   fit_statistic::String = "R²",
   maxiters::Int64 = 10_000,
   seed::Int64 = 42,
@@ -118,7 +118,7 @@ fitgrowthmodels(
 - `B::Dict`: Search space for the parameter `B` (growth rate). Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=0.0`, `upper=10.0`.
 - `v::Dict`: Search space for the parameter `v` (asymmetry parameter). Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=1e-5`, `upper=10.0`.
 - `min_t::Int64`: Minimum number of time points required to fit the growth model for a specific combination of entry, site, replication, and growing period. Defaults to `3`.
-- `perc_of_final::Vector{Float64}`: Percentages of the final value for which the time to reach these percentages will be calculated. Defaults to `[0.5, 0.9]`.
+- `frac_of_final::Vector{Float64}`: Percentages of the final value for which the time to reach these fraction will be calculated. Defaults to `[0.5, 0.9]`.
 - `fit_statistic::String`: The fit statistic to be used for evaluating the model. Must be one of `["R²", "RMSE", "MSE", "MAE", "ρ"]`. Defaults to `"R²"`.
 - `maxiters::Int64`: Maximum number of iterations allowed for the optimization process. Defaults to `10_000`.
 - `seed::Int64`: Random seed for reproducibility. Defaults to `42`.
@@ -128,7 +128,7 @@ fitgrowthmodels(
 ### Returns
 
 `Tuple{DataFrame, Vector{String}}`: 
-  + The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
+  + The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified fraction of the final value for each combination of entry, site, replication, and growing period.
   + The second element is a `Vector{String}` containing the combinations that were skipped due to insufficient data points.
 
 ### Notes

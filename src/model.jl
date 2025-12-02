@@ -406,7 +406,7 @@ Calculate the time required for a growth model to reach a proportion `p` of its 
 
 # Arguments
 - `growth_model::GrowthModel`: An instance of the `GrowthModel` type containing the parameters of the growth model.
-- `p::Vector{Float64}`: A vector of proportions (default is `[0.5]`) representing the fraction of the carrying capacity `K` to compute the time for.
+- `p::Vector{Float64}`: A vector of proportions (default is `[0.5]`) representing the fraction of the carrying capacity (``y_{max}``) to compute the time for.
 
 # Returns
 - `Vector{Float64}`: A vector of times corresponding to each proportion in `p`.

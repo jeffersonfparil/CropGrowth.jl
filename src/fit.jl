@@ -16,7 +16,7 @@
         B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0),
         v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0),
         min_t::Int64 = 3,
-        perc_of_final::Vector{Float64} = [0.5, 0.9],
+        frac_of_final::Vector{Float64} = [0.5, 0.9],
         fit_statistic::String = "R²",
         maxiters::Int64 = 10_000,
         seed::Int64 = 42,
@@ -24,7 +24,7 @@
         verbose::Bool = false,
     )::Tuple{DataFrame, Vector{String}}
 
-Fits generalised logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified percentages of the final value.
+Fits generalised logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified fractions of the final value.
 
 # Arguments
 - `df::DataFrame`: Input data containing the required columns specified in `REQUIRED_COLUMNS = ["entries", "sites", "replications", "growing_periods", "time_points"]` and at least one trait column.
@@ -35,7 +35,7 @@ Fits generalised logistic growth models to the data provided in the input `DataF
 - `B::Dict`: Search space for the parameter `B` (growth rate). Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=0.0`, `upper=10.0`.
 - `v::Dict`: Search space for the parameter `v` (asymmetry parameter). Contains `:init`, `:lower`, and `:upper` keys. Defaults to `init=1.0`, `lower=1e-5`, `upper=10.0`.
 - `min_t::Int64`: Minimum number of time points required to fit the growth model for a specific combination of entry, site, replication, and growing period. Defaults to `3`.
-- `perc_of_final::Vector{Float64}`: Percentages of the final value for which the time to reach these percentages will be calculated. Defaults to `[0.5, 0.9]`.
+- `frac_of_final::Vector{Float64}`: Percentages of the final value for which the time to reach these fractions will be calculated. Defaults to `[0.5, 0.9]`.
 - `fit_statistic::String`: The fit statistic to be used for evaluating the model. Must be one of `["R²", "RMSE", "MSE", "MAE", "ρ"]`. Defaults to `"R²"`.
 - `maxiters::Int64`: Maximum number of iterations allowed for the optimisation process. Defaults to `10_000`.
 - `seed::Int64`: Random seed for reproducibility. Defaults to `42`.
@@ -44,7 +44,7 @@ Fits generalised logistic growth models to the data provided in the input `DataF
 
 # Returns
 - `Tuple{DataFrame, Vector{String}}`: 
-    - The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified percentages of the final value for each combination of entry, site, replication, and growing period.
+    - The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified fractions of the final value for each combination of entry, site, replication, and growing period.
     - The second element is a `Vector{String}` containing the combinations that were skipped due to insufficient data points.
 
 # Notes
@@ -123,14 +123,14 @@ function fitgrowthmodels(
     B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0),
     v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0),
     min_t::Int64 = 3,
-    perc_of_final::Vector{Float64} = [0.5, 0.9],
+    frac_of_final::Vector{Float64} = [0.5, 0.9],
     fit_statistic::String = "R²",
     maxiters::Int64 = 10_000,
     seed::Int64 = 42,
     show_plots::Bool = false,
     verbose::Bool = false,
 )::Tuple{DataFrame,Vector{String}}
-    # df::DataFrame = simulate(); min_t::Int64=3; perc_of_final::Vector{Float64} = [0.5, 0.9]; fit_statistic::String = "R²"; maxiters::Int64 = 10_000; seed::Int64 = 42; show_plots::Bool=false; verbose::Bool=false
+    # df::DataFrame = simulate(); min_t::Int64=3; frac_of_final::Vector{Float64} = [0.5, 0.9]; fit_statistic::String = "R²"; maxiters::Int64 = 10_000; seed::Int64 = 42; show_plots::Bool=false; verbose::Bool=false
     # A = Dict(:init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); K = Dict(:init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); C = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); Q = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0); v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0)
     if !all(x -> x ∈ names(df), REQUIRED_COLUMNS)
         throw(
@@ -188,7 +188,7 @@ function fitgrowthmodels(
         "y_max" => Float64[],
         fit_statistic => Float64[],
     )
-    for p in perc_of_final
+    for p in frac_of_final
         fitted_parameters["time_to_$(Int(round(p*100)))p"] = Float64[]
     end
     if verbose
@@ -231,7 +231,7 @@ function fitgrowthmodels(
                         seed = seed,
                         verbose = show_plots,
                     )
-                    time_to_perc_of_final = timetomaxperc(growth_model, p = perc_of_final)
+                    time_to_frac_of_final = timetomaxperc(growth_model, p = frac_of_final)
                     fitted_parameters["entries"] = vcat(fitted_parameters["entries"], entry)
                     fitted_parameters["sites"] = vcat(fitted_parameters["sites"], site)
                     fitted_parameters["replications"] =
@@ -252,9 +252,9 @@ function fitgrowthmodels(
                         fitted_parameters[fit_statistic],
                         growth_model.fit_statistics[fit_statistic],
                     )
-                    for (i, p) in enumerate(perc_of_final)
-                        # i = 1; p = perc_of_final[i]
-                        Kp = time_to_perc_of_final[i]
+                    for (i, p) in enumerate(frac_of_final)
+                        # i = 1; p = frac_of_final[i]
+                        Kp = time_to_frac_of_final[i]
                         fitted_parameters["time_to_$(Int(round(p*100)))p"] =
                             vcat(fitted_parameters["time_to_$(Int(round(p*100)))p"], Kp)
                     end
