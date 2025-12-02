@@ -24,7 +24,7 @@
         verbose::Bool = false,
     )::Tuple{DataFrame, Vector{String}}
 
-Fits generalized logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified percentages of the final value.
+Fits generalised logistic growth models to the data provided in the input `DataFrame` and returns a `DataFrame` containing the fitted parameters, fit statistics, and time to reach specified percentages of the final value.
 
 # Arguments
 - `df::DataFrame`: Input data containing the required columns specified in `REQUIRED_COLUMNS = ["entries", "sites", "replications", "growing_periods", "time_points"]` and at least one trait column.
@@ -37,7 +37,7 @@ Fits generalized logistic growth models to the data provided in the input `DataF
 - `min_t::Int64`: Minimum number of time points required to fit the growth model for a specific combination of entry, site, replication, and growing period. Defaults to `3`.
 - `perc_of_final::Vector{Float64}`: Percentages of the final value for which the time to reach these percentages will be calculated. Defaults to `[0.5, 0.9]`.
 - `fit_statistic::String`: The fit statistic to be used for evaluating the model. Must be one of `["R²", "RMSE", "MSE", "MAE", "ρ"]`. Defaults to `"R²"`.
-- `maxiters::Int64`: Maximum number of iterations allowed for the optimization process. Defaults to `10_000`.
+- `maxiters::Int64`: Maximum number of iterations allowed for the optimisation process. Defaults to `10_000`.
 - `seed::Int64`: Random seed for reproducibility. Defaults to `42`.
 - `show_plots::Bool`: Whether to show fitted growth curve plots. Defaults to `false`.
 - `verbose::Bool`: Whether to display progress and additional information during the fitting process. Defaults to `false`.
@@ -52,9 +52,11 @@ Fits generalized logistic growth models to the data provided in the input `DataF
 - If the `DataFrame` contains more than one trait column, only the first trait column will be used.
 - Combinations with fewer than `min_t` time points will be skipped.
 - The function uses a progress bar to indicate the fitting process if `verbose=true`.
+- The optimisation is performed using the `BBO_adaptive_de_rand_1_bin_radiuslimited()` algorithm ([details of the optimisation algorithm](https://docs.sciml.ai/Optimization/stable/optimisation_packages/blackboxoptim/)).
+- The optimisation algorithm minimises the mean squared error between the observed data `y` and the generalised logistic model. 
 
 # Details
-Fits a generalized logistic growth model to the data using the following equation:
+Fits a generalised logistic growth model to the data using the following equation:
 
 ```math
 y(t) = A + \\frac{K-A}{C + (Qe^{-Bt})^{1/v}}

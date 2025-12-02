@@ -10,7 +10,7 @@
         y_max::Float64
         fit_statistics::Dict{String,Float64}
 
-Holds parameters for the generalized logistic growth model:
+Holds parameters for the generalised logistic growth model:
 
 ```math
 y(t) = A + \\frac{K-A}{C + (Qe^{-Bt})^{1/v}}
@@ -153,7 +153,7 @@ end
 """
     generalisedlogistic(t::Vector{Float64}; A=0.0, K=1.0, C=1.0, Q=1.0, B=1.0, v=1.0)::Vector{Float64}
 
-Computes the generalized logistic function for a given vector of time points `t`.
+Computes the generalised logistic function for a given vector of time points `t`.
 
 # Arguments
 - `t::Vector{Float64}`: A vector of time points at which to evaluate the function.
@@ -167,7 +167,7 @@ Computes the generalized logistic function for a given vector of time points `t`
 - `v::Float64` (default: `1.0`): asymmetry parameter (``v ≥ 0``; small values: fast growth early; large values: fast growth later)
 
 # Returns
-- `Vector{Float64}`: A vector of values representing the generalized logistic function evaluated at each time point in `t`.
+- `Vector{Float64}`: A vector of values representing the generalised logistic function evaluated at each time point in `t`.
 
 # Example
 ```jldoctest; setup = :(using CropGrowth)
@@ -194,17 +194,17 @@ end
 """
     generalisedlogistic(growth_model::GrowthModel; t::Vector{Float64})::Vector{Float64}
 
-Computes the generalized logistic function for a given vector of time points `t` using the parameters defined in the `GrowthModel`.
+Computes the generalised logistic function for a given vector of time points `t` using the parameters defined in the `GrowthModel`.
 
 # Arguments
-- `growth_model::GrowthModel`: A struct containing the parameters for the generalized logistic function.
+- `growth_model::GrowthModel`: A struct containing the parameters for the generalised logistic function.
 - `t::Vector{Float64}`: A vector of time points at which to evaluate the function.
 
 # Returns
-- `Vector{Float64}`: A vector of values representing the generalized logistic function evaluated at each time point in `t`.
+- `Vector{Float64}`: A vector of values representing the generalised logistic function evaluated at each time point in `t`.
 
 # Returns
-- `Vector{Float64}`: A vector of values representing the generalized logistic function evaluated at each time point in `t`.
+- `Vector{Float64}`: A vector of values representing the generalised logistic function evaluated at each time point in `t`.
 
 # Example
 ```jldoctest; setup = :(using CropGrowth)
@@ -240,23 +240,23 @@ end
         verbose::Bool=false
     )::GrowthModel
 
-Fit a generalized logistic growth model to the given data `y` over time `t`.
+Fit a generalised logistic growth model to the given data `y` over time `t`.
 
 # Arguments
 - `y::Vector{Float64}`: The observed data points representing the growth values.
 - `t::Vector{Float64}`: The corresponding time points for the observed data.
-- `θ_search_space::Dict{String, Dict{Symbol, Float64}}`: A dictionary defining the search space for each parameter of the generalized logistic model. Each key corresponds to a parameter name (`"A"`, `"K"`, `"C"`, `"Q"`, `"B"`, `"v"`), and the value is another dictionary with keys `:init`, `:lower`, and `:upper` specifying the initial value, lower bound, and upper bound for that parameter.
-- `maxiters::Int64=10_000`: The maximum number of iterations for the optimization algorithm. Defaults to 10,000.
+- `θ_search_space::Dict{String, Dict{Symbol, Float64}}`: A dictionary defining the search space for each parameter of the generalised logistic model. Each key corresponds to a parameter name (`"A"`, `"K"`, `"C"`, `"Q"`, `"B"`, `"v"`), and the value is another dictionary with keys `:init`, `:lower`, and `:upper` specifying the initial value, lower bound, and upper bound for that parameter.
+- `maxiters::Int64=10_000`: The maximum number of iterations for the optimisation algorithm. Defaults to 10,000.
 - `seed::Int64=42`: The random seed for reproducibility. Defaults to 42.
 - `verbose::Bool=false`: If `true`, prints the fitted parameters, fit statistics, and displays a plot of the fitted model. Defaults to `false`.
 
 # Returns
-- `GrowthModel`: A structure containing the fitted parameters of the generalized logistic growth model and fit statistics.
+- `GrowthModel`: A structure containing the fitted parameters of the generalised logistic growth model and fit statistics.
 
 # Details
-- The function uses an optimization algorithm to minimize the mean squared error between the observed data `y` and the generalized logistic model. 
+- The function uses an optimisation algorithm to minimise the mean squared error between the observed data `y` and the generalised logistic model. 
 - The model parameters are constrained within bounds specified in the `θ_search_space` dictionary.
-- The optimization is performed using the `BBO_adaptive_de_rand_1_bin_radiuslimited()` algorithm.
+- The optimisation is performed using the `BBO_adaptive_de_rand_1_bin_radiuslimited()` algorithm ([details of the optimisation algorithm](https://docs.sciml.ai/Optimization/stable/optimisation_packages/blackboxoptim/)).
 - The function also computes fit statistics, which are included in the returned `GrowthModel` structure.
 - If `verbose` is set to `true`, the function prints the fitted parameters, fit statistics, and displays a scatter plot of the observed data along with the fitted curve.
 

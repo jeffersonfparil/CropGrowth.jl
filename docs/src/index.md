@@ -25,7 +25,7 @@ y(t) = {A + {{K-A} \over {C + (Qe^{-Bt})^{1/v}}}}
 
 where:
 
-- ``y(t)``: biomass at time ``t`` (not part of the struct)
+- ``y(t)``: biomass at time ``t``
 - ``A``: lower asymptote (initial or minimum biomass)
 - ``K``: positively affects the upper asymptote. This is the final or maximum biomass if:
     + ``C = 1.00``, since:
@@ -137,6 +137,9 @@ fitgrowthmodels(
 - If the `DataFrame` contains more than one trait column, only the first trait column will be used.
 - Combinations with fewer than `min_t` time points will be skipped.
 - The function uses a progress bar to indicate the fitting process if `verbose=true`.
+- The optimisation is performed using the `BBO_adaptive_de_rand_1_bin_radiuslimited()` algorithm ([details of the optimisation algorithm](https://docs.sciml.ai/Optimization/stable/optimisation_packages/blackboxoptim/)).
+- The optimisation algorithm minimises the mean squared error between the observed data `y` and the generalised logistic model. 
+
 
 ## Examples
 
@@ -156,6 +159,97 @@ mean(df_out_0.R²)
 mean(df_out_C.R²)
 mean(df_out_Q.R²)
 mean(df_out_CQ.R²)
+```
+
+## Comparison with `nplr`
+
+**TLDR**: `CropGrowth.jl` fits a more general logistic function than `nplr.`
+
+The R package `nplr`: n-parameter logistic regressions fits a variant of the logistic model.
+It fits *5 parameters* instead of the *6 parameters* in `CropGrowth.jl`'s formulation above.
+The model is defined as:
+
+```math
+y(x) = {
+  B + {
+    {T - B} 
+    \over 
+    {\left [ 1 + 10^{b(x_{mid} - x)} \right ]^s}
+  }
+}
+```
+
+where:
+- ``B``: lower asymptote
+- ``T``: upper asymptote
+- ``b``: Hill slope (related to `B` or growth rate)
+- ``x_{mid}``: x-coordinate at the inflexion point,
+- ``s`` asymetry coefficient (related to `v`)
+
+Fitting log10(dose)-response curve with `nplr`:
+
+```R
+library(nplr)
+library(txtplot)
+path <- system.file("extdata", "pc3.txt", package="nplr")
+pc3 <- read.delim(path)
+txtplot::txtplot(log10(pc3$CONC), pc3$GIPROP) # nplr default does log10(x)
+np1 <- nplr::nplr(x=pc3$CONC, y=pc3$GIPROP, useLog=TRUE)
+y = pc3$GIPROP
+y_hat = np1@yFit
+print("Fitted parameters:")
+print(paste0("K = ", np1@pars$bottom))
+print(paste0("A = ", np1@pars$top))
+print(paste0("xmid = ", np1@pars$xmid))
+print(paste0("B_ish = ", np1@pars$scal))
+print(paste0("v_ish = ", np1@pars$scal))
+print("Fit statistics:")
+print(paste0("mae = ", mean(abs(y - y_hat))))
+print(paste0("mse = ", mean((y - y_hat)^2)))
+print(paste0("rmse = ", sqrt(mean((y - y_hat)^2))))
+print(paste0("cor = ", cor(y, y_hat)))
+print(paste0("r2 = ", 1 - (var((y - y_hat)) / var(y))))
+# [1] "Fitted parameters:"
+# [1] "K = 0.000182956669824204"
+# [1] "A = 0.996490622312222"
+# [1] "xmid = -6.18254538738321"
+# [1] "B_ish = -1.42800873142546"
+# [1] "v_ish = -1.42800873142546"
+# [1] "Fit statistics:"
+# [1] "mae = 0.0186073781104083"
+# [1] "mse = 0.000651821232462819"
+# [1] "rmse = 0.0255307898910868"
+# [1] "cor = 0.997250250732751"
+# [1] "r2 = 0.994444954867448"
+```
+
+`CropGrowth.jl` achieves very similar but more generalised fit:
+
+```julia
+using DataFrames, CSV, CropGrowth
+df = CSV.read(expanduser("~/.conda/envs/GenomicBreeding/lib/R/library/nplr/extdata/pc3.txt"), DataFrame)
+growth_model = modelgrowth(
+    t = log10.(df.CONC),
+    y = df.GIPROP,
+    maxiters = 100_000,
+    seed = 42,
+    verbose = true,
+)
+# Fitted parameters:
+# A = 0.991559343580949
+# K = 0.0380737475678395
+# C = 1.0
+# Q = 1.5219825671137292e-5
+# B = 1.5916146320430173
+# v = 0.15864685998073122
+# y_t0 = 0.03816521536021922
+# y_max = 0.038073747568793115
+# Fit statistics:
+# mse = 0.0006662392521457019
+# rmse = 0.0258116108010659
+# R² = 0.9943191952067459
+# ρ = 0.9971555521616207
+# mae = 0.020947684621310015
 ```
 
 ## API
