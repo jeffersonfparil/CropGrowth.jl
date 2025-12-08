@@ -357,6 +357,7 @@ function modelgrowth(;
             θ_search_space["v"][:upper],
         ],
     )
+    Random.seed!(seed)
     θ = solve(
         prob,
         BBO_adaptive_de_rand_1_bin_radiuslimited(),
