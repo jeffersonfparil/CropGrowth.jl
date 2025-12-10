@@ -44,7 +44,7 @@ Fits generalised logistic growth models to the data provided in the input `DataF
 
 # Returns
 - `Tuple{DataFrame, Vector{String}}`: 
-    - The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified fractions of the final value for each combination of entry, site, replication, and growing period.
+    - The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), time to reach specified fractions of the final value (`time_to_*p`), and number of time-points (`number_of_time_points`) for each combination of entry, site, replication, and growing period.
     - The second element is a `Vector{String}` containing the combinations that were skipped due to insufficient data points.
 
 # Notes
@@ -178,6 +178,7 @@ function fitgrowthmodels(
         "sites" => String[],
         "replications" => String[],
         "growing_periods" => String[],
+        "number_of_time_points" => Int64[],
         "A" => Float64[],
         "K" => Float64[],
         "C" => Float64[],
@@ -238,6 +239,8 @@ function fitgrowthmodels(
                         vcat(fitted_parameters["replications"], replication)
                     fitted_parameters["growing_periods"] =
                         vcat(fitted_parameters["growing_periods"], growing_period)
+                    fitted_parameters["number_of_time_points"] =
+                        vcat(fitted_parameters["number_of_time_points"], length(idx))
                     fitted_parameters["A"] = vcat(fitted_parameters["A"], growth_model.A)
                     fitted_parameters["K"] = vcat(fitted_parameters["K"], growth_model.K)
                     fitted_parameters["C"] = vcat(fitted_parameters["C"], growth_model.C)
@@ -279,6 +282,7 @@ function fitgrowthmodels(
         :sites,
         :replications,
         :growing_periods,
+        :number_of_time_points,
         :A,
         :K,
         :C,
@@ -293,6 +297,7 @@ function fitgrowthmodels(
             :sites,
             :replications,
             :growing_periods,
+            :number_of_time_points,
             :A,
             :K,
             :C,
