@@ -140,9 +140,10 @@ function fitstatistics(; y::Vector{Float64}, ŷ::Vector{Float64})::Dict{String,
     if length(y) != length(ŷ)
         throw(ArgumentError("Vectors y and ŷ must be of the same length."))
     end
+    ϵ::Float64 = 1e-12
     ss_total = sum((y .- mean(y)) .^ 2)
     ss_residual = sum((y .- ŷ) .^ 2)
-    R² = 1.0 - (ss_residual / ss_total)
+    R² = 1.0 - ((ss_residual+ϵ) / (ss_total+ϵ))
     mae = mean(abs.(y .- ŷ))
     mse = mean((y .- ŷ) .^ 2)
     rmse = sqrt(mse)
