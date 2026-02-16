@@ -108,27 +108,27 @@ true
 """
 function fitgrowthmodels(
     df::DataFrame;
-    A = Dict(
+    A=Dict(
         :init => minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
         :lower => 0.0,
         :upper => maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
     ),
-    K = Dict(
+    K=Dict(
         :init => maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
         :lower => 0.0,
         :upper => 2 * maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
     ),
-    C = Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
-    Q = Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
-    B = Dict(:init => 1.0, :lower => 0.0, :upper => 10.0),
-    v = Dict(:init => 1.0, :lower => 1e-5, :upper => 10.0),
-    min_t::Int64 = 3,
-    frac_of_final::Vector{Float64} = [0.5, 0.9],
-    fit_statistic::String = "R²",
-    maxiters::Int64 = 10_000,
-    seed::Int64 = 42,
-    show_plots::Bool = false,
-    verbose::Bool = false,
+    C=Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
+    Q=Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
+    B=Dict(:init => 1.0, :lower => 0.0, :upper => 10.0),
+    v=Dict(:init => 1.0, :lower => 1e-5, :upper => 10.0),
+    min_t::Int64=3,
+    frac_of_final::Vector{Float64}=[0.5, 0.9],
+    fit_statistic::String="R²",
+    maxiters::Int64=10_000,
+    seed::Int64=42,
+    show_plots::Bool=false,
+    verbose::Bool=false,
 )::Tuple{DataFrame,Vector{String}}
     # df::DataFrame = simulate(); min_t::Int64=3; frac_of_final::Vector{Float64} = [0.5, 0.9]; fit_statistic::String = "R²"; maxiters::Int64 = 10_000; seed::Int64 = 42; show_plots::Bool=false; verbose::Bool=false
     # A = Dict(:init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); K = Dict(:init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); C = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); Q = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0); v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0)
@@ -198,15 +198,9 @@ function fitgrowthmodels(
             length(sites) *
             length(replications) *
             length(growing_periods),
-            desc = "Fitting growth models",
+            desc="Fitting growth models",
         )
     end
-
-
-    ##################################################
-    ##################################################
-    ##################################################
-    # Attempting to parallelise
     # Prep filter variables
     filter_variables::Vector{Dict{Symbol,String}} = []
     for entry in entries
@@ -238,11 +232,10 @@ function fitgrowthmodels(
             end
         end
     end
-
-
+    # Fit growth curves in parallel (remember open julia with something like the following to enable multiple threads: `julia +1.12 --threads=23,1 --project=.`)
     n = length(filter_variables)
     if verbose
-        pb = ProgressMeter.Progress(n; desc = "GWAS via OLS using " * GRM_type * " GRM:")
+        pb = ProgressMeter.Progress(n; desc="GWAS via OLS using " * GRM_type * " GRM:")
     end
     thread_lock::ReentrantLock = ReentrantLock()
     Threads.@threads for i = 1:n
@@ -265,14 +258,14 @@ function fitgrowthmodels(
             println("Fitting growth model for $combination")
         end
         growth_model = modelgrowth(
-            y = y,
-            t = t,
-            θ_search_space = θ_search_space,
-            maxiters = maxiters,
-            seed = seed,
-            verbose = show_plots,
+            y=y,
+            t=t,
+            θ_search_space=θ_search_space,
+            maxiters=maxiters,
+            seed=seed,
+            verbose=show_plots,
         )
-        time_to_frac_of_final = timetomaxperc(growth_model, p = frac_of_final)
+        time_to_frac_of_final = timetomaxperc(growth_model, p=frac_of_final)
         @lock thread_lock fitted_parameters["entries"] =
             vcat(fitted_parameters["entries"], entry)
         @lock thread_lock fitted_parameters["sites"] =
@@ -317,79 +310,6 @@ function fitgrowthmodels(
         ProgressMeter.finish!(pb)
         GenomicBreedingCore.plot(fit, TDist(length(fit.entries) - 1))
     end
-    ##################################################
-    ##################################################
-    ##################################################
-
-
-
-    # for entry in entries
-    #     for site in sites
-    #         for replication in replications
-    #             for growing_period in growing_periods
-    #                 # entry = entries[1]; site = sites[1]; replication = replications[1]; growing_period = growing_periods[1];
-    #                 idx = findall(
-    #                     (df.entries .== entry) .&&
-    #                     (df.sites .== site) .&&
-    #                     (df.replications .== replication) .&&
-    #                     (df.growing_periods .== growing_period),
-    #                 )
-    #                 combination = "entry=\"$entry\"; site=\"$site\"; replication=\"$replication\"; growing_period=\"$growing_period\""
-    #                 if length(idx) < min_t
-    #                     # @warn "Not enough data points (minimum t = $min_t) to fit growth model for $combination. Skipping."
-    #                     push!(skipped_combinations, combination)
-    #                     continue
-    #                 end
-    #                 df_sub = df[idx, :]
-    #                 t::Vector{Float64} = df_sub.time_points
-    #                 y::Vector{Float64} = df_sub[:, trait_name]
-    #                 if show_plots
-    #                     println("Fitting growth model for $combination")
-    #                 end
-    #                 growth_model = modelgrowth(
-    #                     y=y,
-    #                     t=t,
-    #                     θ_search_space=θ_search_space,
-    #                     maxiters=maxiters,
-    #                     seed=seed,
-    #                     verbose=show_plots,
-    #                 )
-    #                 time_to_frac_of_final = timetomaxperc(growth_model, p=frac_of_final)
-    #                 fitted_parameters["entries"] = vcat(fitted_parameters["entries"], entry)
-    #                 fitted_parameters["sites"] = vcat(fitted_parameters["sites"], site)
-    #                 fitted_parameters["replications"] =
-    #                     vcat(fitted_parameters["replications"], replication)
-    #                 fitted_parameters["growing_periods"] =
-    #                     vcat(fitted_parameters["growing_periods"], growing_period)
-    #                 fitted_parameters["number_of_time_points"] =
-    #                     vcat(fitted_parameters["number_of_time_points"], length(idx))
-    #                 fitted_parameters["A"] = vcat(fitted_parameters["A"], growth_model.A)
-    #                 fitted_parameters["K"] = vcat(fitted_parameters["K"], growth_model.K)
-    #                 fitted_parameters["C"] = vcat(fitted_parameters["C"], growth_model.C)
-    #                 fitted_parameters["Q"] = vcat(fitted_parameters["Q"], growth_model.Q)
-    #                 fitted_parameters["B"] = vcat(fitted_parameters["B"], growth_model.B)
-    #                 fitted_parameters["v"] = vcat(fitted_parameters["v"], growth_model.v)
-    #                 fitted_parameters["y_t0"] =
-    #                     vcat(fitted_parameters["y_t0"], growth_model.y_t0)
-    #                 fitted_parameters["y_max"] =
-    #                     vcat(fitted_parameters["y_max"], growth_model.y_max)
-    #                 fitted_parameters[fit_statistic] = vcat(
-    #                     fitted_parameters[fit_statistic],
-    #                     growth_model.fit_statistics[fit_statistic],
-    #                 )
-    #                 for (i, p) in enumerate(frac_of_final)
-    #                     # i = 1; p = frac_of_final[i]
-    #                     Kp = time_to_frac_of_final[i]
-    #                     fitted_parameters["time_to_$(Int(round(p*100)))p"] =
-    #                         vcat(fitted_parameters["time_to_$(Int(round(p*100)))p"], Kp)
-    #                 end
-    #                 if verbose
-    #                     ProgressMeter.next!(pb)
-    #                 end
-    #             end
-    #         end
-    #     end
-    # end
     if verbose
         ProgressMeter.finish!(pb)
         println(
