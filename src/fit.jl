@@ -178,36 +178,35 @@ function fitgrowthmodels(
     # Identify growth curves we can fit, i.e. >= min_t
     curve_ids::Vector{Dict{Symbol,String}} = []
     skipped_combinations::Vector{String} = []
-    dict_entry = Dict()
+    dict_entries = Dict()
     for entry in entries
-        dict_entry[String(entry)] = df.entries .== entry
+        dict_entries[String(entry)] = df.entries .== entry
     end
-    dict_site = Dict()
+    dict_sites = Dict()
     for site in sites
-        dict_site[String(site)] = df.sites .== site
+        dict_sites[String(site)] = df.sites .== site
     end
-    dict_replication = Dict()
+    dict_replications = Dict()
     for replication in replications
-        dict_replication[String(replication)] = df.replications .== replication
+        dict_replications[String(replication)] = df.replications .== replication
     end
-    dict_growing_period = Dict()
+    dict_growing_periods = Dict()
     for growing_period in growing_periods
-        dict_growing_period[String(growing_period)] = df.growing_periods .== growing_period
+        dict_growing_periods[String(growing_period)] = df.growing_periods .== growing_period
     end
+    n =
+        length(dict_entries) *
+        length(dict_sites) *
+        length(dict_replications) *
+        length(dict_growing_periods)
     if verbose
-        pb = ProgressMeter.Progress(
-            length(dict_entry) *
-            length(dict_site) *
-            length(dict_replication) *
-            length(dict_growing_period),
-            desc = "Preparing growth data combinations",
-        )
+        pb = ProgressMeter.Progress(n, desc = "Filtering $n growth curves")
     end
-    for (entry, idx_entry) in sort(dict_entry)
-        for (site, idx_site) in sort(dict_site)
-            for (replication, idx_replication) in sort(dict_replication)
-                for (growing_period, idx_growing_period) in sort(dict_growing_period)
-                    # entry = string.(keys(dict_entry))[1]; idx_entry = dict_entry[entry]; site = string.(keys(dict_site))[1]; idx_site = dict_site[site]; replication = string.(keys(dict_replication))[1]; idx_replication = dict_replication[replication]; growing_period = string.(keys(dict_growing_period))[1]; idx_growing_period = dict_growing_period[growing_period]
+    for (entry, idx_entry) in sort(dict_entries)
+        for (site, idx_site) in sort(dict_sites)
+            for (replication, idx_replication) in sort(dict_replications)
+                for (growing_period, idx_growing_period) in sort(dict_growing_periods)
+                    # entry = string.(keys(dict_entries))[1]; idx_entry = dict_entries[entry]; site = string.(keys(dict_sites))[1]; idx_site = dict_sites[site]; replication = string.(keys(dict_replications))[1]; idx_replication = dict_replications[replication]; growing_period = string.(keys(dict_growing_periods))[1]; idx_growing_period = dict_growing_periods[growing_period]
                     idx = idx_entry .&& idx_site .&& idx_replication .&& idx_growing_period
                     if verbose
                         ProgressMeter.next!(pb)
@@ -260,7 +259,7 @@ function fitgrowthmodels(
     # Fit growth curves in parallel (remember open julia with something like the following to enable multiple threads: `julia +1.12 --threads=23,1 --project=.`)
     n = length(curve_ids)
     if verbose
-        pb = ProgressMeter.Progress(n; desc = "Fitting growth models")
+        pb = ProgressMeter.Progress(n; desc = "Fitting growth $n models")
     end
     thread_lock::ReentrantLock = ReentrantLock()
     Threads.@threads for i = 1:n
