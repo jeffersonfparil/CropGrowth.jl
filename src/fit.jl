@@ -53,7 +53,10 @@ Fits generalised logistic growth models to the data provided in the input `DataF
 - Combinations with fewer than `min_t` time points will be skipped.
 - The function uses a progress bar to indicate the fitting process if `verbose=true`.
 - The optimisation is performed using the `BBO_adaptive_de_rand_1_bin_radiuslimited()` algorithm ([details of the optimisation algorithm](https://docs.sciml.ai/Optimization/stable/optimisation_packages/blackboxoptim/)).
-- The optimisation algorithm minimises the mean squared error between the observed data `y` and the generalised logistic model. 
+- The optimisation algorithm minimises the mean squared error between the observed data `y` and the generalised logistic model.
+- Parallel curve fitting:
+    - The per-combination fits are executed in parallel using `Threads.@threads` over the prepared list of filter combinations. To take advantage of this, start Julia with multiple threads (for example `julia -t 4` or set `JULIA_NUM_THREADS`).
+    - Access to the shared `fitted_parameters` dictionary is protected with a `ReentrantLock` and `@lock` to ensure thread-safety when appending results. This avoids race conditions but introduces some serialization for the final writes.
 
 # Details
 Fits a generalised logistic growth model to the data using the following equation:
@@ -108,27 +111,27 @@ true
 """
 function fitgrowthmodels(
     df::DataFrame;
-    A=Dict(
+    A = Dict(
         :init => minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
         :lower => 0.0,
         :upper => maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
     ),
-    K=Dict(
+    K = Dict(
         :init => maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
         :lower => 0.0,
         :upper => 2 * maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
     ),
-    C=Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
-    Q=Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
-    B=Dict(:init => 1.0, :lower => 0.0, :upper => 10.0),
-    v=Dict(:init => 1.0, :lower => 1e-5, :upper => 10.0),
-    min_t::Int64=3,
-    frac_of_final::Vector{Float64}=[0.5, 0.9],
-    fit_statistic::String="R²",
-    maxiters::Int64=10_000,
-    seed::Int64=42,
-    show_plots::Bool=false,
-    verbose::Bool=false,
+    C = Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
+    Q = Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
+    B = Dict(:init => 1.0, :lower => 0.0, :upper => 10.0),
+    v = Dict(:init => 1.0, :lower => 1e-5, :upper => 10.0),
+    min_t::Int64 = 3,
+    frac_of_final::Vector{Float64} = [0.5, 0.9],
+    fit_statistic::String = "R²",
+    maxiters::Int64 = 10_000,
+    seed::Int64 = 42,
+    show_plots::Bool = false,
+    verbose::Bool = false,
 )::Tuple{DataFrame,Vector{String}}
     # df::DataFrame = simulate(); min_t::Int64=3; frac_of_final::Vector{Float64} = [0.5, 0.9]; fit_statistic::String = "R²"; maxiters::Int64 = 10_000; seed::Int64 = 42; show_plots::Bool=false; verbose::Bool=false
     # A = Dict(:init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); K = Dict(:init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); C = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); Q = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0); v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0)
@@ -198,7 +201,7 @@ function fitgrowthmodels(
             length(sites) *
             length(replications) *
             length(growing_periods),
-            desc="Fitting growth models",
+            desc = "Fitting growth models",
         )
     end
     # Prep filter variables
@@ -214,6 +217,7 @@ function fitgrowthmodels(
                         (df.replications .== replication) .&&
                         (df.growing_periods .== growing_period),
                     )
+                    combination = "entry=\"$entry\"; site=\"$site\"; replication=\"$replication\"; growing_period=\"$growing_period\""
                     if length(idx) < min_t
                         # @warn "Not enough data points (minimum t = $min_t) to fit growth model for $combination. Skipping."
                         push!(skipped_combinations, combination)
@@ -235,7 +239,7 @@ function fitgrowthmodels(
     # Fit growth curves in parallel (remember open julia with something like the following to enable multiple threads: `julia +1.12 --threads=23,1 --project=.`)
     n = length(filter_variables)
     if verbose
-        pb = ProgressMeter.Progress(n; desc="GWAS via OLS using " * GRM_type * " GRM:")
+        pb = ProgressMeter.Progress(n; desc = "Fitting growth models")
     end
     thread_lock::ReentrantLock = ReentrantLock()
     Threads.@threads for i = 1:n
@@ -258,57 +262,54 @@ function fitgrowthmodels(
             println("Fitting growth model for $combination")
         end
         growth_model = modelgrowth(
-            y=y,
-            t=t,
-            θ_search_space=θ_search_space,
-            maxiters=maxiters,
-            seed=seed,
-            verbose=show_plots,
+            y = y,
+            t = t,
+            θ_search_space = θ_search_space,
+            maxiters = maxiters,
+            seed = seed,
+            verbose = show_plots,
         )
-        time_to_frac_of_final = timetomaxperc(growth_model, p=frac_of_final)
-        @lock thread_lock fitted_parameters["entries"] =
-            vcat(fitted_parameters["entries"], entry)
-        @lock thread_lock fitted_parameters["sites"] =
-            vcat(fitted_parameters["sites"], site)
-        @lock thread_lock fitted_parameters["replications"] =
-            vcat(fitted_parameters["replications"], replication)
-        @lock thread_lock fitted_parameters["growing_periods"] =
-            vcat(fitted_parameters["growing_periods"], growing_period)
-        @lock thread_lock fitted_parameters["number_of_time_points"] =
-            vcat(fitted_parameters["number_of_time_points"], length(idx))
-        @lock thread_lock fitted_parameters["A"] =
-            vcat(fitted_parameters["A"], growth_model.A)
-        @lock thread_lock fitted_parameters["K"] =
-            vcat(fitted_parameters["K"], growth_model.K)
-        @lock thread_lock fitted_parameters["C"] =
-            vcat(fitted_parameters["C"], growth_model.C)
-        @lock thread_lock fitted_parameters["Q"] =
-            vcat(fitted_parameters["Q"], growth_model.Q)
-        @lock thread_lock fitted_parameters["B"] =
-            vcat(fitted_parameters["B"], growth_model.B)
-        @lock thread_lock fitted_parameters["v"] =
-            vcat(fitted_parameters["v"], growth_model.v)
-        @lock thread_lock fitted_parameters["y_t0"] =
-            vcat(fitted_parameters["y_t0"], growth_model.y_t0)
-        @lock thread_lock fitted_parameters["y_max"] =
-            vcat(fitted_parameters["y_max"], growth_model.y_max)
-        @lock thread_lock fitted_parameters[fit_statistic] = vcat(
-            fitted_parameters[fit_statistic],
-            growth_model.fit_statistics[fit_statistic],
-        )
-        for (i, p) in enumerate(frac_of_final)
-            # i = 1; p = frac_of_final[i]
-            Kp = time_to_frac_of_final[i]
-            @lock thread_lock fitted_parameters["time_to_$(Int(round(p*100)))p"] =
-                vcat(fitted_parameters["time_to_$(Int(round(p*100)))p"], Kp)
+        time_to_frac_of_final = timetomaxperc(growth_model, p = frac_of_final)
+        # Collect results locally to minimise lock contention
+        local_entry = entry
+        local_site = site
+        local_replication = replication
+        local_growing_period = growing_period
+        local_n_t = length(idx)
+        local_A = growth_model.A
+        local_K = growth_model.K
+        local_C = growth_model.C
+        local_Q = growth_model.Q
+        local_B = growth_model.B
+        local_v = growth_model.v
+        local_y_t0 = growth_model.y_t0
+        local_y_max = growth_model.y_max
+        local_fit_stat = growth_model.fit_statistics[fit_statistic]
+        local_times = [time_to_frac_of_final[j] for j = 1:length(frac_of_final)]
+        # Append all results with single lock
+        @lock thread_lock begin
+            push!(fitted_parameters["entries"], local_entry)
+            push!(fitted_parameters["sites"], local_site)
+            push!(fitted_parameters["replications"], local_replication)
+            push!(fitted_parameters["growing_periods"], local_growing_period)
+            push!(fitted_parameters["number_of_time_points"], local_n_t)
+            push!(fitted_parameters["A"], local_A)
+            push!(fitted_parameters["K"], local_K)
+            push!(fitted_parameters["C"], local_C)
+            push!(fitted_parameters["Q"], local_Q)
+            push!(fitted_parameters["B"], local_B)
+            push!(fitted_parameters["v"], local_v)
+            push!(fitted_parameters["y_t0"], local_y_t0)
+            push!(fitted_parameters["y_max"], local_y_max)
+            push!(fitted_parameters[fit_statistic], local_fit_stat)
+            for (j, p) in enumerate(frac_of_final)
+                key = "time_to_$(Int(round(p*100)))p"
+                push!(fitted_parameters[key], local_times[j])
+            end
+            if verbose
+                ProgressMeter.next!(pb)
+            end
         end
-        if verbose
-            ProgressMeter.next!(pb)
-        end
-    end
-    if verbose
-        ProgressMeter.finish!(pb)
-        GenomicBreedingCore.plot(fit, TDist(length(fit.entries) - 1))
     end
     if verbose
         ProgressMeter.finish!(pb)
