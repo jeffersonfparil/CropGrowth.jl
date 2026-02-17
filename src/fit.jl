@@ -175,7 +175,69 @@ function fitgrowthmodels(
     replications = sort(unique(df[!, :replications]))
     growing_periods = sort(unique(df[!, :growing_periods]))
     trait_name = setdiff(names(df), REQUIRED_COLUMNS)[1]
+    # Identify growth curves we can fit, i.e. >= min_t
+    curve_ids::Vector{Dict{Symbol,String}} = []
     skipped_combinations::Vector{String} = []
+    dict_entry = Dict()
+    for entry in entries
+        dict_entry[String(entry)] = df.entries .== entry
+    end
+    dict_site = Dict()
+    for site in sites
+        dict_site[String(site)] = df.sites .== site
+    end
+    dict_replication = Dict()
+    for replication in replications
+        dict_replication[String(replication)] = df.replications .== replication
+    end
+    dict_growing_period = Dict()
+    for growing_period in growing_periods
+        dict_growing_period[String(growing_period)] = df.growing_periods .== growing_period
+    end
+    if verbose
+        pb = ProgressMeter.Progress(
+            length(dict_entry) *
+            length(dict_site) *
+            length(dict_replication) *
+            length(dict_growing_period),
+            desc = "Preparing growth data combinations",
+        )
+    end
+    for (entry, idx_entry) in sort(dict_entry)
+        for (site, idx_site) in sort(dict_site)
+            for (replication, idx_replication) in sort(dict_replication)
+                for (growing_period, idx_growing_period) in sort(dict_growing_period)
+                    # entry = string.(keys(dict_entry))[1]; idx_entry = dict_entry[entry]; site = string.(keys(dict_site))[1]; idx_site = dict_site[site]; replication = string.(keys(dict_replication))[1]; idx_replication = dict_replication[replication]; growing_period = string.(keys(dict_growing_period))[1]; idx_growing_period = dict_growing_period[growing_period]
+                    idx = idx_entry .&& idx_site .&& idx_replication .&& idx_growing_period
+                    if verbose
+                        ProgressMeter.next!(pb)
+                    end
+                    combination = "entry=\"$entry\"; site=\"$site\"; replication=\"$replication\"; growing_period=\"$growing_period\""
+                    if sum(idx) < min_t
+                        # @warn "Not enough data points (minimum t = $min_t) to fit growth model for $combination. Skipping."
+                        push!(skipped_combinations, combination)
+                        continue
+                    end
+                    push!(
+                        curve_ids,
+                        Dict(
+                            :entry => entry,
+                            :site => site,
+                            :replication => replication,
+                            :growing_period => growing_period,
+                        ),
+                    )
+                end
+            end
+        end
+    end
+    if verbose
+        ProgressMeter.finish!(pb)
+        println(
+            "Skipped $(length(skipped_combinations)) combinations due to insufficient data points (i.e. t < $min_t).",
+        )
+    end
+    # Prepare output data dictionary
     fitted_parameters = Dict(
         "entries" => String[],
         "sites" => String[],
@@ -195,59 +257,18 @@ function fitgrowthmodels(
     for p in frac_of_final
         fitted_parameters["time_to_$(Int(round(p*100)))p"] = Float64[]
     end
-    if verbose
-        pb = ProgressMeter.Progress(
-            length(entries) *
-            length(sites) *
-            length(replications) *
-            length(growing_periods),
-            desc = "Fitting growth models",
-        )
-    end
-    # Prep filter variables
-    filter_variables::Vector{Dict{Symbol,String}} = []
-    for entry in entries
-        for site in sites
-            for replication in replications
-                for growing_period in growing_periods
-                    # entry = entries[1]; site = sites[1]; replication = replications[1]; growing_period = growing_periods[1];
-                    idx = findall(
-                        (df.entries .== entry) .&&
-                        (df.sites .== site) .&&
-                        (df.replications .== replication) .&&
-                        (df.growing_periods .== growing_period),
-                    )
-                    combination = "entry=\"$entry\"; site=\"$site\"; replication=\"$replication\"; growing_period=\"$growing_period\""
-                    if length(idx) < min_t
-                        # @warn "Not enough data points (minimum t = $min_t) to fit growth model for $combination. Skipping."
-                        push!(skipped_combinations, combination)
-                        continue
-                    end
-                    push!(
-                        filter_variables,
-                        Dict(
-                            :entry => entry,
-                            :site => site,
-                            :replication => replication,
-                            :growing_period => growing_period,
-                        ),
-                    )
-                end
-            end
-        end
-    end
     # Fit growth curves in parallel (remember open julia with something like the following to enable multiple threads: `julia +1.12 --threads=23,1 --project=.`)
-    n = length(filter_variables)
+    n = length(curve_ids)
     if verbose
         pb = ProgressMeter.Progress(n; desc = "Fitting growth models")
     end
     thread_lock::ReentrantLock = ReentrantLock()
     Threads.@threads for i = 1:n
         # i = 1
-        entry = filter_variables[i][:entry]
-        site = filter_variables[i][:site]
-        replication = filter_variables[i][:replication]
-        growing_period = filter_variables[i][:growing_period]
+        entry = curve_ids[i][:entry]
+        site = curve_ids[i][:site]
+        replication = curve_ids[i][:replication]
+        growing_period = curve_ids[i][:growing_period]
         idx = findall(
             (df.entries .== entry) .&&
             (df.sites .== site) .&&
@@ -313,9 +334,6 @@ function fitgrowthmodels(
     end
     if verbose
         ProgressMeter.finish!(pb)
-        println(
-            "Skipped $(length(skipped_combinations)) combinations due to insufficient data points (i.e. t < $min_t).",
-        )
     end
     # Output dataFrame and sort columns sensibly
     df_out = DataFrame(fitted_parameters)
