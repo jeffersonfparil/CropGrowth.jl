@@ -111,30 +111,37 @@ true
 """
 function fitgrowthmodels(
     df::DataFrame;
-    A=Dict(
+    A = Dict(
         :init => minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
         :lower => 0.0,
         :upper => maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
     ),
-    K=Dict(
+    K = Dict(
         :init => maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
         :lower => 0.0,
         :upper => 2 * maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]),
     ),
-    C=Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
-    Q=Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
-    B=Dict(:init => 1.0, :lower => 0.0, :upper => 10.0),
-    v=Dict(:init => 1.0, :lower => 1e-5, :upper => 10.0),
-    min_t::Int64=3,
-    frac_of_final::Vector{Float64}=[0.5, 0.9],
-    fit_statistic::String="R²",
-    maxiters::Int64=10_000,
-    seed::Int64=42,
-    show_plots::Bool=false,
-    verbose::Bool=false,
+    C = Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
+    Q = Dict(:init => 1.0, :lower => 1.0, :upper => 1.0),
+    B = Dict(:init => 1.0, :lower => 0.0, :upper => 10.0),
+    v = Dict(:init => 1.0, :lower => 1e-5, :upper => 10.0),
+    min_t::Int64 = 3,
+    frac_of_final::Vector{Float64} = [0.5, 0.9],
+    fit_statistic::String = "R²",
+    maxiters::Int64 = 10_000,
+    seed::Int64 = 42,
+    show_plots::Bool = false,
+    verbose::Bool = false,
 )::Tuple{DataFrame,Vector{String}}
     # df::DataFrame = simulate(); min_t::Int64=3; frac_of_final::Vector{Float64} = [0.5, 0.9]; fit_statistic::String = "R²"; maxiters::Int64 = 10_000; seed::Int64 = 42; show_plots::Bool=false; verbose::Bool=false
     # A = Dict(:init=>minimum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); K = Dict(:init=>maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1]), :lower=>0.0, :upper=>2*maximum(select(df, Not(REQUIRED_COLUMNS))[:, 1])); C = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); Q = Dict(:init=>1.0, :lower=>1.0, :upper=>1.0); B = Dict(:init=>1.0, :lower=>0.0, :upper=>10.0); v = Dict(:init=>1.0, :lower=>1e-5, :upper=>10.0)
+    if nrow(df) < min_t
+        throw(
+            ArgumentError(
+                "Input DataFrame have less than $min_t rows, i.e. nrow(df) = $(nrow(df)).",
+            ),
+        )
+    end
     if !all(x -> x ∈ names(df), REQUIRED_COLUMNS)
         throw(
             ArgumentError(
@@ -200,7 +207,7 @@ function fitgrowthmodels(
         length(dict_replications) *
         length(dict_growing_periods)
     if verbose
-        pb = ProgressMeter.Progress(n, desc="Filtering $n growth curves")
+        pb = ProgressMeter.Progress(n, desc = "Filtering $n growth curves")
     end
     for (entry, idx_entry) in dict_entries
         for (site, idx_site) in dict_sites
@@ -259,7 +266,7 @@ function fitgrowthmodels(
     # Fit growth curves in parallel (remember open julia with something like the following to enable multiple threads: `julia +1.12 --threads=23,1 --project=.`)
     n = length(curve_ids)
     if verbose
-        pb = ProgressMeter.Progress(n; desc="Fitting growth $n models")
+        pb = ProgressMeter.Progress(n; desc = "Fitting growth $n models")
     end
     thread_lock::ReentrantLock = ReentrantLock()
     Threads.@threads for i = 1:n
@@ -282,14 +289,14 @@ function fitgrowthmodels(
             println("Fitting growth model for $combination")
         end
         growth_model = modelgrowth(
-            y=y,
-            t=t,
-            θ_search_space=θ_search_space,
-            maxiters=maxiters,
-            seed=seed,
-            verbose=show_plots,
+            y = y,
+            t = t,
+            θ_search_space = θ_search_space,
+            maxiters = maxiters,
+            seed = seed,
+            verbose = show_plots,
         )
-        time_to_frac_of_final = timetomaxperc(growth_model, p=frac_of_final)
+        time_to_frac_of_final = timetomaxperc(growth_model, p = frac_of_final)
         # Collect results locally to minimise lock contention
         local_entry = entry
         local_site = site
