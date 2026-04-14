@@ -30,7 +30,7 @@ where:
 Additional information are provided in the struct:
 
 - `y_t0`: value of the growth model at time ``t = 0``
-- `y_max`: maximum value of the growth model (``y_{max} = A + (K-A)/C^(1/v)``)
+- `y_max`: maximum value of the growth model (``y_{max} = A + (K-A)/C^{1/v}``)
 - `fit_statistics`: a dictionary containing fit statistics such as R², RMSE, MSE, MAE, and Pearson's correlation coefficient (ρ)
 
 # Constructor
