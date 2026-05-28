@@ -104,7 +104,8 @@ fitgrowthmodels(
 - Combinations with fewer than `min_t` time points will be skipped.
 - The function uses a progress bar to indicate the fitting process if `verbose=true`.
 - The optimisation is performed using the `BBO_adaptive_de_rand_1_bin_radiuslimited()` algorithm ([details of the optimisation algorithm](https://docs.sciml.ai/Optimization/stable/optimisation_packages/blackboxoptim/)).
-- The optimisation algorithm minimises the mean squared error between the observed data `y` and the generalised logistic model. 
+- The optimisation algorithm minimises the mean squared error between the observed data `y` and the generalised logistic model.
+- The growth model is fitted per replication, and so if you wish to use all replications to fit the model, then set all the replications into a single dummy rep, e.g. `df.replications .= "aggregate_all_reps"`.
 
 ## Examples
 
