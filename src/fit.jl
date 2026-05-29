@@ -87,6 +87,24 @@ julia> df = simulate(n_entries=5, seed=42);
 
 julia> df_out, skipped_combinations = fitgrowthmodels(df);
 
+julia> # Visualise a sample curve
+
+julia> i = 1; entry, site, replication, growing_period = df_out.entries[i], df_out.sites[i], df_out.replications[i], df_out.growing_periods[i];
+
+julia> df_tmp = filter(x -> (x.entries == entry) && (x.sites == site) && (x.replications == replication) && (x.growing_periods == growing_period), df);
+
+julia> t = collect(minimum(df_tmp.time_points):1.0:maximum(df_tmp.time_points));
+
+julia> y = generalisedlogistic(t; A=df_out.A[i], K=df_out.K[i], C=df_out.C[i], Q=df_out.Q[i], B=df_out.B[i], v=df_out.v[i]);
+
+julia> p = UnicodePlots.lineplot(t, y);
+
+julia> UnicodePlots.scatterplot!(p, df_tmp.time_points, df_tmp.biomass, marker = :diamond);
+
+julia> # display(p)
+
+julia> # Tests
+
 julia> length(unique(df.entries)) == length(unique(df_out.entries))
 true
 
