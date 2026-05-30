@@ -94,7 +94,7 @@ fitgrowthmodels(
 ### Returns
 
 `Tuple{DataFrame, Vector{String}}`: 
-  + The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified fraction of the final value for each combination of entry, site, replication, and growing period.
+  + The first element is a `DataFrame` containing the fitted parameters (`A`, `K`, `C`, `Q`, `B`, `v`), fit statistics, value of the growth models at ``t=0`` (`y_t0`), maximum value of the growth model (`y_max`), and time to reach specified fraction of the final value for each combination of `entries`, `sites`, `replications`, and `growing_periods`.
   + The second element is a `Vector{String}` containing the combinations that were skipped due to insufficient data points.
 
 ### Notes

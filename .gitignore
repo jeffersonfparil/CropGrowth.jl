@@ -15,4 +15,6 @@
 Manifest.toml
 docs/build/
 tmp/
-build/
+build/# pixi environments
+.pixi/*
+!.pixi/config.toml
