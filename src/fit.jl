@@ -82,7 +82,7 @@ Additional information are provided in the output `DataFrame`:
 - One of the following fit statistic such as R² (default), RMSE, MSE, MAE, and Pearson's correlation coefficient (ρ)
 
 # Example
-```jldoctest; setup = :(using CropGrowth, DataFrames, StatsBase)
+```jldoctest; setup = :(using CropGrowth, DataFrames, StatsBase, UnicodePlots)
 julia> df = simulate(n_entries=5, seed=42);
 
 julia> df_out, skipped_combinations = fitgrowthmodels(df);
